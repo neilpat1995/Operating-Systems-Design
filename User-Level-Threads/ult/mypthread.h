@@ -33,15 +33,15 @@ int mypthread_join(mypthread_t thread, void **retval);
 typedef int mypthread_mutex_t;
 typedef int mypthread_mutexattr_t;
 
-inline int mypthread_mutex_init(mypthread_mutex_t *mutex,
+static inline int mypthread_mutex_init(mypthread_mutex_t *mutex,
 			const mypthread_mutexattr_t *attr) { return 0; }
 
-inline int mypthread_mutex_destroy(mypthread_mutex_t *mutex) { return 0; }
+static inline int mypthread_mutex_destroy(mypthread_mutex_t *mutex) { return 0; }
 
-inline int mypthread_mutex_lock(mypthread_mutex_t *mutex) { return 0; }
+static inline int mypthread_mutex_lock(mypthread_mutex_t *mutex) { return 0; }
 
-inline int mypthread_mutex_trylock(mypthread_mutex_t *mutex) { return 0; }
+static inline int mypthread_mutex_trylock(mypthread_mutex_t *mutex) { return 0; }
 
-inline int mypthread_mutex_unlock(mypthread_mutex_t *mutex) { return 0; }
+static inline int mypthread_mutex_unlock(mypthread_mutex_t *mutex) { return 0; }
 
 #endif
