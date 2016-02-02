@@ -1,6 +1,7 @@
 #ifndef H_MYPTHREAD
 #define H_MYPTHREAD
 
+#define _XOPEN_SOURCE
 #include <ucontext.h>
 
 // States
