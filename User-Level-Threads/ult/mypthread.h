@@ -1,9 +1,23 @@
 #ifndef H_MYPTHREAD
 #define H_MYPTHREAD
 
+#include <ucontext.h>
+
+// States
+#define UNUSED 0
+#define RUNNING 1
+#define READY 2
+#define BLOCKED 3
+#define ZOMBIE 4
+
+#define MAX_THREADS 1024
+
 // Types
 typedef struct {
-	// Define any fields you might need inside here.
+	int state;
+	int id;
+	ucontext_t* context;
+	int join_id;
 } mypthread_t;
 
 typedef struct {
