@@ -9,7 +9,7 @@
 #define RUNNING 1
 #define READY 2
 #define BLOCKED 3
-#define ZOMBIE 4
+#define DONE 4
 
 #define MAX_THREADS 1024
 
