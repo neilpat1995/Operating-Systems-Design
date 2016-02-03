@@ -3,7 +3,11 @@
 
 #include "mypthread.h"
 
+<<<<<<< HEAD
 // indicates whether mypthread_create has beeen called yet
+=======
+// indicates whether mypthreadcreate has been called yet
+>>>>>>> 55a21fbe00cd29d3f9b0948c6b4f3f7be26b1ebc
 static int first = 0;
 
 // indicates which thread is running
@@ -19,7 +23,7 @@ int mypthread_create(mypthread_t *thread, const mypthread_attr_t *attr,
 			void *(*start_routine) (void *), void *arg)
 {
 	if(num_threads == MAX_THREADS) {
-		printf("Error: Too many threads. Max is %d\n", MAX_THREADS);
+		printf("Error: Too many threads. Max is %d.\n", MAX_THREADS);
 		return -1;
 	}
 
@@ -47,6 +51,9 @@ int mypthread_create(mypthread_t *thread, const mypthread_attr_t *attr,
 		printf("Failed to get new context.\n");
 		return -1;
 	}
+	new_context->uc_stack.ss_sp = threads[num_threads].stack;
+	new_context->uc_stack.ss_size = STACK_SIZE;
+	new_context->uc_link = 0;
 	makecontext(new_context, start_routine, *(int*)arg);
 
 	mypthread_t* new_thread = &(threads[num_threads]);
@@ -98,19 +105,22 @@ void mypthread_exit(void *retval)
 	threads[next_thread_id].state = RUNNING;
 
 	// set context to the new one
-	free(threads[running_thread_id].context);
+//	free(threads[running_thread_id].context);
 	running_thread_id = next_thread_id;
 	setcontext(threads[next_thread_id].context);
 }
 
 int mypthread_yield(void)
 {
+	if(!first) {
+		return 0;
+	}
+
 	// we haven't finished yielding yet
 	threads[running_thread_id].yielded = 0;
 
 	// save our current thread
 	if(getcontext(threads[running_thread_id].context)){
-		printf("Failed to get new context.\n");
 		return -1;
 	}
 
@@ -148,8 +158,11 @@ int mypthread_yield(void)
 	threads[next_thread_id].state = RUNNING;
 
 	// set context to the new one
+	int temp = running_thread_id;
 	running_thread_id = next_thread_id;
-	setcontext(threads[next_thread_id].context);
+	printf("good?\n");
+	swapcontext(threads[temp].context, threads[next_thread_id].context);
+	printf("good.\n");
 
 	return 0;
 }

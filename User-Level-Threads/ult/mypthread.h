@@ -12,6 +12,7 @@
 #define DONE 4
 
 #define MAX_THREADS 1024
+#define STACK_SIZE 16384
 
 // Types
 typedef struct {
@@ -21,6 +22,7 @@ typedef struct {
 	int join_id;
 	void *retval;
 	int yielded;
+	char stack[STACK_SIZE];
 } mypthread_t;
 
 typedef struct {
