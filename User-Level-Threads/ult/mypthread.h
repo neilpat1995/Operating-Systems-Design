@@ -22,7 +22,6 @@ typedef struct {
 	int join_id;
 	void *retval;
 	int yielded;
-	char stack[STACK_SIZE];
 } mypthread_t;
 
 typedef struct {

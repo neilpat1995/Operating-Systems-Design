@@ -165,8 +165,8 @@ int mypthread_yield(void)
 	// set context to the new one
 	int temp = running_thread_id;
 	running_thread_id = next_thread_id;
-	printf("threads[next_thread_id].context: %0x\n", threads[next_thread_id].context);
-	swapcontext(threads[temp].context, threads[next_thread_id].context);
+	printf("threads[next_thread_id].context: %0x\n", threamds[next_thread_id].context);
+	setcontext(threads[next_thread_id].context);
 
 	return 0;
 }
