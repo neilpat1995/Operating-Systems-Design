@@ -47,17 +47,17 @@ int mypthread_create(mypthread_t *thread, const mypthread_attr_t *attr,
 		num_threads++;
 	}
 
+	int my_thread_id = num_threads;
+
 	ucontext_t* new_context = (ucontext_t*)malloc(sizeof(ucontext_t));
 	if(getcontext(new_context)){
 		printf("Failed to get new context.\n");
 		return -1;
 	}
 
-	int my_thread_id = num_threads;
-
 	if(my_thread_id != num_threads) {
 		// we were created. call the function.
-		*start_routine(arg);
+		threads[my_thread_id].retval = start_routine(arg);
 	} else {
 		// we did the creating. initialize the thread.
 		mypthread_t* new_thread = &(threads[num_threads]);
@@ -165,7 +165,7 @@ int mypthread_yield(void)
 	// set context to the new one
 	int temp = running_thread_id;
 	running_thread_id = next_thread_id;
-	printf("threads[next_thread_id].context: 	\n", threads[next_thread_id].context);
+	printf("threads[next_thread_id].context: %0x\n", threads[next_thread_id].context);
 	swapcontext(threads[temp].context, threads[next_thread_id].context);
 
 	return 0;
