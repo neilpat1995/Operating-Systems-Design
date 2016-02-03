@@ -3,7 +3,7 @@
 
 #include "mypthread.h"
 
-// indicates whether mypthreadcreate has been called yet
+// indicates whether mypthread_create has been called yet
 static int first = 0;
 
 // indicates which thread is running
@@ -25,6 +25,11 @@ int mypthread_create(mypthread_t *thread, const mypthread_attr_t *attr,
 
 	// if we haven't yet called this function, make a struct for the original (main) thread
 	if(!first) {
+		// clear the array for debugging purposes
+		for(int i = 0; i < sizeof(mypthread_t)*MAX_THREADS; i++) {
+			((char*)threads)[i] = 0;
+		}
+
 		ucontext_t* main_context = (ucontext_t*)malloc(sizeof(ucontext_t));
 		if(getcontext(main_context)){
 			printf("Failed to get main context.\n");
@@ -47,20 +52,24 @@ int mypthread_create(mypthread_t *thread, const mypthread_attr_t *attr,
 		printf("Failed to get new context.\n");
 		return -1;
 	}
-	new_context->uc_stack.ss_sp = threads[num_threads].stack;
-	new_context->uc_stack.ss_size = STACK_SIZE;
-	new_context->uc_link = 0;
-	makecontext(new_context, start_routine, *(int*)arg);
 
-	mypthread_t* new_thread = &(threads[num_threads]);
-	new_thread->state = READY;
-	new_thread->id = num_threads;
-	new_thread->context = new_context;
-	new_thread->join_id = -1;
-	new_thread->retval = 0;
+	int my_thread_id = num_threads;
 
-	thread->id = num_threads;
-	num_threads++;
+	if(my_thread_id != num_threads) {
+		// we were created. call the function.
+		*start_routine(arg);
+	} else {
+		// we did the creating. initialize the thread.
+		mypthread_t* new_thread = &(threads[num_threads]);
+		new_thread->state = NEW;
+		new_thread->id = num_threads;
+		new_thread->context = new_context;
+		new_thread->join_id = -1;
+		new_thread->retval = 0;
+
+		thread->id = num_threads;
+		num_threads++;
+	}
 	return 0;
 }
 
@@ -94,7 +103,7 @@ void mypthread_exit(void *retval)
 			printf("Last available thread exited.\n");
 			exit(0);
 		}
-	} while(threads[next_thread_id].state != READY);
+	} while(threads[next_thread_id].state != READY && threads[next_thread_id].state != NEW);
 
 	// update states
 	threads[running_thread_id].state = DONE;
@@ -143,7 +152,7 @@ int mypthread_yield(void)
 			// well, looks like there's nothing to yield to.
 			break;
 		}
-	} while(threads[next_thread_id].state != READY);
+	} while(threads[next_thread_id].state != READY && threads[next_thread_id].state != NEW);
 
 	// update states - if we were waiting for a join, we become blocked
 	if(threads[running_thread_id].join_id == -1) {
@@ -156,15 +165,15 @@ int mypthread_yield(void)
 	// set context to the new one
 	int temp = running_thread_id;
 	running_thread_id = next_thread_id;
-	printf("good?\n");
+	printf("threads[next_thread_id].context: 	\n", threads[next_thread_id].context);
 	swapcontext(threads[temp].context, threads[next_thread_id].context);
-	printf("good.\n");
 
 	return 0;
 }
 
 int mypthread_join(mypthread_t thread, void **retval)
 {
+	// if that thread is done, get its retval, otherwise yield
 	if(threads[thread.id].state == DONE) {
 		*retval = threads[thread.id].retval;
 	} else {

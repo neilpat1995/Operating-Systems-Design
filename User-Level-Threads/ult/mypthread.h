@@ -5,7 +5,7 @@
 #include <ucontext.h>
 
 // States
-#define UNUSED 0
+#define NEW 0
 #define RUNNING 1
 #define READY 2
 #define BLOCKED 3
