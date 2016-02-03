@@ -4,6 +4,7 @@
 #include "mypthread.h"
 
 // indicates whether mypthread_create has been called yet
+
 static int first = 0;
 
 // indicates which thread is running
