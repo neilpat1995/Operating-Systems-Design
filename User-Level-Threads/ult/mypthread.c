@@ -3,7 +3,7 @@
 
 #include "mypthread.h"
 
-// indicates whether mypthreadcreate has beeen called yet
+// indicates whether mypthread_create has beeen called yet
 static int first = 0;
 
 // indicates which thread is running
