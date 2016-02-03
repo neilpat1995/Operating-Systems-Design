@@ -19,6 +19,8 @@ typedef struct {
 	int id;
 	ucontext_t* context;
 	int join_id;
+	void *retval;
+	int yielded;
 } mypthread_t;
 
 typedef struct {
