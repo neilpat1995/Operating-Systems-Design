@@ -15,9 +15,7 @@ static mypthread_t threads[MAX_THREADS];
 // how many threads have we created?
 static int num_threads = 0;
 
-int mypthread_create(mypthread_t *thread, const mypthread_attr_t *attr,
-			void *(*start_routine) (void *), void *arg)
-{
+int mypthread_create(mypthread_t *thread, const mypthread_attr_t *attr, void *(*start_routine) (void *), void *arg) {
 	if(num_threads == MAX_THREADS) {
 		printf("Error: Too many threads. Max is %d.\n", MAX_THREADS);
 		return -1;
@@ -37,30 +35,19 @@ int mypthread_create(mypthread_t *thread, const mypthread_attr_t *attr,
 		}
 
 		//NEIL'S ADDITION- INITIALIZE FIELDS OF CONTEXT AND THREAD
-		
-		if (!first) {
-			/*char stack[STACK_SIZE];
-			stack_t stk;
-			stk.ss_sp = (void *)stack;
-			stk.ss_size = STACK_SIZE;
-			stk.ss_flags = 0;
-			main_context->uc_stack = stk;
-			main_context->uc_link = 0;*/
+		mypthread_t* main_thread = &(threads[num_threads]);
+		main_thread->state = RUNNING;
+		main_thread->id = 0;
+		main_thread->context = main_context;
+		main_thread->join_id = -1;
+		main_thread->retval = 0;
 
-			mypthread_t* main_thread = &(threads[num_threads]);
-			main_thread->state = RUNNING;
-			main_thread->id = 0;
-			main_thread->context = main_context;
-			main_thread->join_id = -1;
-			main_thread->retval = 0;
-
-			first = 1;
-			num_threads++;	
+		if(first) {
+			printf("SOMETHING WENT WRONG, MAIN RETURNED TO CREATE()!\n");
 		}
 
-		else {
-			printf("SOMETHING WENT WRONG, MAIN RETURNED TO CREATE!\n");
-		}
+		num_threads++;
+		first = 1;
 	}
 
 	int my_thread_id = num_threads;
@@ -76,7 +63,7 @@ int mypthread_create(mypthread_t *thread, const mypthread_attr_t *attr,
 		//Just exit from it if this is the created thread. 
 		//threads[my_thread_id-1].retval = start_routine(arg);
 		//NEIL'S ADDITION
-		printf("SOMETHING WENT HORRIBLY WRONG, CREATED THREAD RETURNED TO CREATE().\n");
+		printf("SOMETHING WENT HORRIBLY WRONG, CREATED THREAD RETURNED TO CREATE()!\n");
 		return 0;
 
 	} else {
@@ -105,8 +92,7 @@ int mypthread_create(mypthread_t *thread, const mypthread_attr_t *attr,
 	return 0;
 }
 
-void mypthread_exit(void *retval)
-{
+void mypthread_exit(void *retval) {
 	// store the retval
 	threads[running_thread_id].retval = retval;
 
@@ -147,8 +133,7 @@ void mypthread_exit(void *retval)
 	setcontext(threads[next_thread_id].context);
 }
 
-int mypthread_yield(void)
-{
+int mypthread_yield(void) {
 	if(!first) {
 		return 0;
 	}
@@ -197,15 +182,13 @@ int mypthread_yield(void)
 	// set context to the new one
 	int temp = running_thread_id;
 	running_thread_id = next_thread_id;
-	printf("threads[next_thread_id].context: %0x\n", threads[next_thread_id].context);
 	printf("Next thread id: %d\n", threads[next_thread_id].id);
 	setcontext(threads[next_thread_id].context);
 
 	return 0;
 }
 
-int mypthread_join(mypthread_t thread, void **retval)
-{
+int mypthread_join(mypthread_t thread, void **retval) {
 	// if that thread is done, get its retval, otherwise yield
 	if(threads[thread.id].state == DONE) {
 		*retval = threads[thread.id].retval;
