@@ -5,11 +5,11 @@
 #include <ucontext.h>
 
 // States
-#define NEW 0
-#define RUNNING 1
-#define READY 2
-#define BLOCKED 3
-#define DONE 4
+#define NEW 1
+#define RUNNING 2
+#define READY 3
+#define BLOCKED 4
+#define DONE 5
 
 #define MAX_THREADS 1024
 #define STACK_SIZE 16384

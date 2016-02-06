@@ -36,15 +36,31 @@ int mypthread_create(mypthread_t *thread, const mypthread_attr_t *attr,
 			return -1;
 		}
 
-		mypthread_t* main_thread = &(threads[num_threads]);
-		main_thread->state = RUNNING;
-		main_thread->id = 0;
-		main_thread->context = main_context;
-		main_thread->join_id = -1;
-		main_thread->retval = 0;
+		//NEIL'S ADDITION- INITIALIZE FIELDS OF CONTEXT AND THREAD
+		
+		if (!first) {
+			/*char stack[STACK_SIZE];
+			stack_t stk;
+			stk.ss_sp = (void *)stack;
+			stk.ss_size = STACK_SIZE;
+			stk.ss_flags = 0;
+			main_context->uc_stack = stk;
+			main_context->uc_link = 0;*/
 
-		first = 1;
-		num_threads++;
+			mypthread_t* main_thread = &(threads[num_threads]);
+			main_thread->state = RUNNING;
+			main_thread->id = 0;
+			main_thread->context = main_context;
+			main_thread->join_id = -1;
+			main_thread->retval = 0;
+
+			first = 1;
+			num_threads++;	
+		}
+
+		else {
+			printf("SOMETHING WENT WRONG, MAIN RETURNED TO CREATE!\n");
+		}
 	}
 
 	int my_thread_id = num_threads;
@@ -56,19 +72,35 @@ int mypthread_create(mypthread_t *thread, const mypthread_attr_t *attr,
 	}
 
 	if(my_thread_id != num_threads) {
-		// we were created. call the function.
-		threads[my_thread_id].retval = start_routine(arg);
+		// we were created. call the function. -NO- this thread is scheduled, but not immediately completed
+		//Just exit from it if this is the created thread. 
+		//threads[my_thread_id-1].retval = start_routine(arg);
+		//NEIL'S ADDITION
+		printf("SOMETHING WENT HORRIBLY WRONG, CREATED THREAD RETURNED TO CREATE().\n");
+		return 0;
+
 	} else {
 		// we did the creating. initialize the thread.
-		mypthread_t* new_thread = &(threads[num_threads]);
-		new_thread->state = NEW;
-		new_thread->id = num_threads;
-		new_thread->context = new_context;
-		new_thread->join_id = -1;
-		new_thread->retval = 0;
+		mypthread_t *newThread = &(threads[num_threads]);
+
+		//NEIL'S ADDITION
+		char newStack[STACK_SIZE];
+		stack_t newStk;
+		newStk.ss_sp = (void *)newStack;
+		newStk.ss_size = STACK_SIZE;
+		newStk.ss_flags = 0;
+		new_context->uc_stack = newStk;
+		new_context->uc_link = 0;
+
+		newThread->state = NEW;
+		newThread->id = num_threads;
+		newThread->context = new_context;
+		newThread->join_id = -1;
+		newThread->retval = 0;
 
 		thread->id = num_threads;
 		num_threads++;
+		makecontext(new_context, (void (*) (void))start_routine, 1, (void *)arg);
 	}
 	return 0;
 }
@@ -165,7 +197,8 @@ int mypthread_yield(void)
 	// set context to the new one
 	int temp = running_thread_id;
 	running_thread_id = next_thread_id;
-	printf("threads[next_thread_id].context: %0x\n", threamds[next_thread_id].context);
+	printf("threads[next_thread_id].context: %0x\n", threads[next_thread_id].context);
+	printf("Next thread id: %d\n", threads[next_thread_id].id);
 	setcontext(threads[next_thread_id].context);
 
 	return 0;
