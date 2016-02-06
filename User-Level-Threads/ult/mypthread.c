@@ -15,6 +15,44 @@ static mypthread_t threads[MAX_THREADS];
 // how many threads have we created?
 static int num_threads = 0;
 
+/*	----------------------------------------------------------------------
+ *	HELPER FUNCTIONS
+ *	---------------------------------------------------------------------- */
+
+// get the thread id of the next ready thread in the queue (or the current if no other ones are ready)
+int get_next_thread_id() {
+	int next_thread_id = running_thread_id;
+	do {
+		next_thread_id++;
+
+		// if we got to the end of the list
+		if(next_thread_id == num_threads) {
+			// go back to the beginning
+			next_thread_id = 0;
+		}
+
+		// if we wrapped all the way back to where we started
+		if(next_thread_id == running_thread_id) {
+			// well, looks like this one's all we got
+			break;
+		}
+	} while(threads[next_thread_id].state != READY && threads[next_thread_id].state != NEW);
+
+	return next_thread_id;
+}
+
+// swtich to the thread of the given id (does not return on success)
+int switch_to_thread(int next_thread_id) {
+	int temp = running_thread_id;
+	running_thread_id = next_thread_id;
+	swapcontext(threads[temp].context, threads[next_thread_id].context);
+}
+
+/*	----------------------------------------------------------------------
+ *	INTERFACE
+ *	---------------------------------------------------------------------- */
+
+// create a thread, filling 'thread' with info to identify it for a later join
 int mypthread_create(mypthread_t *thread, const mypthread_attr_t *attr, void *(*start_routine) (void *), void *arg) {
 	if(num_threads == MAX_THREADS) {
 		printf("Error: Too many threads. Max is %d.\n", MAX_THREADS);
@@ -105,73 +143,47 @@ void mypthread_exit(void *retval) {
 	}
 
 	// switch to the next available thread
-	int next_thread_id = running_thread_id;
-	do {
-		next_thread_id++;
-
-		// if we got to the end of the list
-		if(next_thread_id == num_threads) {
-			// go back to the beginning
-			next_thread_id = 0;
-		}
-
-		// if we wrapped all the way back to where we started
-		if(next_thread_id == running_thread_id) {
-			// well, looks like we're done.
-			printf("Last available thread exited.\n");
-			exit(0);
-		}
-	} while(threads[next_thread_id].state != READY && threads[next_thread_id].state != NEW);
+	int next_thread_id = get_next_thread_id();
+	if(next_thread_id == running_thread_id) {
+		// well, looks like we're done here
+		printf("Error: Last ready thread exited!\n");
+		exit(0);
+	}
 
 	// update states
 	threads[running_thread_id].state = DONE;
 	threads[next_thread_id].state = RUNNING;
 
 	// set context to the new one
-//	free(threads[running_thread_id].context);
-	running_thread_id = next_thread_id;
-	setcontext(threads[next_thread_id].context);
+	free(threads[running_thread_id].context);
+	switch_to_thread(next_thread_id);
 }
 
 int mypthread_yield(void) {
+	// check if we've even made any threads yet
 	if(!first) {
 		return 0;
 	}
 
-	// we haven't finished yielding yet
-	threads[running_thread_id].yielded = 0;
-
-	// save our current thread
-	if(getcontext(threads[running_thread_id].context)){
-		return -1;
-	}
-
-	// have we done the rest of this stuff already?
-	if(threads[running_thread_id].yielded) {
-		return 0;
-	} else {
-		threads[running_thread_id].yielded = 1;
-	}
-
 	// switch to the next available thread
-	int next_thread_id = running_thread_id;
-	do {
-		next_thread_id++;
-
-		// if we got to the end of the list
-		if(next_thread_id == num_threads) {
-			// go back to the beginning
-			next_thread_id = 0;
+	int next_thread_id = get_next_thread_id();
+	if(next_thread_id == running_thread_id) {
+		// there's nothing to yield to...
+		if(threads[running_thread_id].join_id != -1) {
+			// ...but we're blocked!
+			printf("Error: Deadlock!\n");
+			exit(0);
+		} else {
+			// ...so let's keep going
+			return 0;
 		}
-
-		// if we wrapped all the way back to where we started
-		if(next_thread_id == running_thread_id) {
-			// well, looks like there's nothing to yield to.
-			break;
-		}
+<<<<<<< HEAD
 	} while(threads[next_thread_id].state != READY= && threads[next_thread_id].state != NEW);
+=======
+	}
+>>>>>>> fe7a41ae77a1370635d93c732ad184e97a3b284f
 
-	// update states - if we were waiting for a join, we become blocked
+	// update states (if we were waiting for a join, we become blocked)
 	if(threads[running_thread_id].join_id == -1) {
 		threads[running_thread_id].state = READY;
 	} else {
@@ -180,10 +192,8 @@ int mypthread_yield(void) {
 	threads[next_thread_id].state = RUNNING;
 
 	// set context to the new one
-	int temp = running_thread_id;
-	running_thread_id = next_thread_id;
 	printf("Next thread id: %d\n", threads[next_thread_id].id);
-	setcontext(threads[next_thread_id].context);
+	switch_to_thread(next_thread_id);
 
 	return 0;
 }
