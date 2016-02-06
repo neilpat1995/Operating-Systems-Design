@@ -169,7 +169,7 @@ int mypthread_yield(void) {
 			// well, looks like there's nothing to yield to.
 			break;
 		}
-	} while(threads[next_thread_id].state != READY && threads[next_thread_id].state != NEW);
+	} while(threads[next_thread_id].state != READY= && threads[next_thread_id].state != NEW);
 
 	// update states - if we were waiting for a join, we become blocked
 	if(threads[running_thread_id].join_id == -1) {
