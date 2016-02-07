@@ -81,13 +81,13 @@ int get_next_thread_id() {
 		}
 	} while(threads[next_thread_id].state != READY && threads[next_thread_id].state != NEW);
 
-	printf("[next thread: %d]\n", next_thread_id);
+	// printf("[next thread: %d]\n", next_thread_id);
 	return next_thread_id;
 }
 
 // swtich to the thread of the given id (does not return on success)
 void switch_to_thread(int next_thread_id) {
-	printf("[switching to thread: %d]\n", next_thread_id);
+	//printf("[switching to thread: %d]\n", next_thread_id);
 	int temp = running_thread_id;
 	running_thread_id = next_thread_id;
 	swapcontext(threads[temp].context, threads[next_thread_id].context);

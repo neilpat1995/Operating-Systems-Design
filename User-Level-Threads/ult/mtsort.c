@@ -1,3 +1,5 @@
+int num_swaps = 0;
+
 /******************************************************************************
  ** CS416 - Operating Systems Theory                                         **
  ** Test Program for HW0 (Spring 2015)                                       **
@@ -57,6 +59,7 @@ void *fnsort( void *arg )
 
         if( num[1] < num[0] )
         {
+            printf("%d\n", num_swaps++);
             swap   = num[0];
             num[0] = num[1];
             num[1] = swap;
@@ -114,7 +117,7 @@ void * fncheck( void *arg )
         // j seconds
         j = j+1;
 #ifndef MYTHREAD
-        sleep( j );
+       // sleep( j );
 #endif
         mypthread_yield( );
     }
