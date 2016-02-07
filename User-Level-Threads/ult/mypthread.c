@@ -177,11 +177,7 @@ int mypthread_yield(void) {
 			// ...so let's keep going
 			return 0;
 		}
-<<<<<<< HEAD
-	} while(threads[next_thread_id].state != READY= && threads[next_thread_id].state != NEW);
-=======
 	}
->>>>>>> fe7a41ae77a1370635d93c732ad184e97a3b284f
 
 	// update states (if we were waiting for a join, we become blocked)
 	if(threads[running_thread_id].join_id == -1) {
@@ -199,6 +195,18 @@ int mypthread_yield(void) {
 }
 
 int mypthread_join(mypthread_t thread, void **retval) {
+	
+	/*First, check for circular join (i.e. the thread to join on is either the running thread, or joins on a sequence of threads that
+	joins on running thread)*/
+	mypthread_t currThread = thread; 
+	while (currThread.join_id != -1) {
+		if (currThread.join_id == running_thread_id) {
+			printf("Error: Thread attempting to join on itself.\n");
+			return(1);	
+		}
+		currThread = thread[currThread.join_id];
+	}
+
 	// if that thread is done, get its retval, otherwise yield
 	if(threads[thread.id].state == DONE) {
 		*retval = threads[thread.id].retval;
@@ -207,6 +215,5 @@ int mypthread_join(mypthread_t thread, void **retval) {
 		threads[running_thread_id].join_id = thread.id;
 		mypthread_yield();
 	}
-
 	return 0;
 }
