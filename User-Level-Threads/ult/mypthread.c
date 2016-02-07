@@ -21,16 +21,7 @@ static int num_threads = 0;
 
 // initialize a running thread
 void init_thread_running(ucontext_t* context) {
-	printf("[initializing thread %d]\n", num_threads);
 	mypthread_t *running_thread = &(threads[num_threads]);
-
-	/*stack_t init_stack;
-	init_stack.ss_sp = malloc(STACK_SIZE);
-	init_stack.ss_size = STACK_SIZE;
-	init_stack.ss_flags = 0;
-
-	context->uc_stack = init_stack;
-	context->uc_link = 0;*/
 
 	// initialize the thread
 	running_thread->state = RUNNING;
@@ -44,7 +35,6 @@ void init_thread_running(ucontext_t* context) {
 
 // initialize a new thread with the start routine and args provided
 void init_thread_new(void *(*start_routine) (void *), void *arg, ucontext_t* context) {
-	printf("[initializing thread %d]\n", num_threads);
 	mypthread_t *new_thread = &(threads[num_threads]);
 
 	// allocate a stack
@@ -94,7 +84,6 @@ int get_next_thread_id() {
 
 // swtich to the thread of the given id (does not return on success)
 void switch_to_thread(int next_thread_id) {
-	printf("[switching to thread: %d]\n", next_thread_id);
 	int temp = running_thread_id;
 	running_thread_id = next_thread_id;
 	swapcontext(threads[temp].context, threads[next_thread_id].context);
