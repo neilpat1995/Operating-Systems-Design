@@ -78,20 +78,17 @@ int get_next_thread_id() {
 
 		// if we got to the end of the list
 		if(next_thread_id == num_threads) {
-			printf("[loop to thread array start]\n");
 			// go back to the beginning
 			next_thread_id = 0;
 		}
 
 		// if we wrapped all the way back to where we started
 		if(next_thread_id == running_thread_id) {
-			printf("[next thread is running thread]\n");
 			// well, looks like this one's all we got
 			break;
 		}
 	} while(threads[next_thread_id].state != READY && threads[next_thread_id].state != NEW);
 
-	printf("[next thread: %d]\n", next_thread_id);
 	return next_thread_id;
 }
 
