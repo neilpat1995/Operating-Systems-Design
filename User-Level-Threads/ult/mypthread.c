@@ -223,7 +223,7 @@ int mypthread_join(mypthread_t thread, void **retval) {
 		*retval = threads[thread.id].retval;
 	} else {
 		threads[running_thread_id].state = BLOCKED;
-		threads[thread.id].join_id = thread.id;
+		threads[running_thread_id].join_id = thread.id;
 		mypthread_yield();
 	}
 	return 0;
