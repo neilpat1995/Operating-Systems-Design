@@ -107,6 +107,9 @@ void * fncheck( void *arg )
             printf("\nQuitting...\n");
         quitting = check;
 
+        //ADDED CODE
+        printList(pList, nListSize);
+
         //unlock all threads
         for( i = 0; i < size; i++ )
             mypthread_mutex_unlock( mtx+i );
