@@ -34,8 +34,6 @@ void printList( int *p, int size );
 
 void *fnsort( void *arg )
 {
-    printf("running fnsort\n");
-
     struct pthrarg *pargs;
     int *num, swap;
     mypthread_mutex_t *mtx0, *mtx1;
@@ -76,8 +74,6 @@ void *fnsort( void *arg )
 
 void * fncheck( void *arg )
 {
-    printf("running fncheck\n");
-
     struct pthrarg *pargs;
     int i, j = 0, size, check;
     mypthread_mutex_t *mtx;
@@ -198,7 +194,7 @@ int main( int argc, char **argv )
     printf( "waiting...\n" );
 
     for( i = 0; i < nListSize-1; i++ ) {
-        //printf("Now beginning iteration %d of mtsort.c loop.\n", i);
+        printf("Now beginning iteration %d of mtsort.c loop.\n", i);
         mypthread_join( threads[i], 0 );
     }
     mypthread_join( thrcheck, 0 );
