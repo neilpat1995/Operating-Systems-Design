@@ -5,6 +5,7 @@
 #include <ucontext.h>
 
 // States
+#define UNUSED 0
 #define NEW 1
 #define RUNNING 2
 #define READY 3
@@ -21,7 +22,6 @@ typedef struct {
 	ucontext_t* context;
 	int join_id;
 	void *retval;
-	int yielded;
 } mypthread_t;
 
 typedef struct {
