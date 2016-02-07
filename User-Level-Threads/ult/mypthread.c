@@ -210,11 +210,13 @@ int mypthread_join(mypthread_t thread, void **retval) {
 	/*First, check for circular join (i.e. the thread to join on is either the running thread, or joins on a sequence of threads that
 	joins on running thread)*/
 	mypthread_t currThread = thread; 
+	int iter = 1;
 	while (currThread.join_id != -1) {
 		if (currThread.join_id == running_thread_id) {
-			printf("Error: Thread attempting to join on itself.\n");
-			return(1);
+			printf("Error: Thread attempting to join on itself. Iteration: %d\n", iter);
+			return(1);	
 		}
+		iter++;
 		currThread = threads[currThread.join_id];
 	}
 
