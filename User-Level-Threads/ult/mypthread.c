@@ -24,6 +24,14 @@ void init_thread_running(ucontext_t* context) {
 	printf("[initializing thread %d]\n", num_threads);
 	mypthread_t *running_thread = &(threads[num_threads]);
 
+	/*stack_t init_stack;
+	init_stack.ss_sp = malloc(STACK_SIZE);
+	init_stack.ss_size = STACK_SIZE;
+	init_stack.ss_flags = 0;
+
+	context->uc_stack = init_stack;
+	context->uc_link = 0;*/
+
 	// initialize the thread
 	running_thread->state = RUNNING;
 	running_thread->id = 0;
