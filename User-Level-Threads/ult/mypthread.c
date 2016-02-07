@@ -31,6 +31,10 @@ void init_thread_running(ucontext_t* context) {
 	running_thread->retval = 0;
 
 	num_threads++;
+
+	if(threads[0].context->uc_stack.ss_sp == 0x0) {
+		printf("WHAT THE FUCK\n");
+	}
 }
 
 // initialize a new thread with the start routine and args provided
