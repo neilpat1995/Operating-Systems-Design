@@ -114,7 +114,8 @@ void * fncheck( void *arg )
         // j seconds
         j = j+1;
 #ifndef MYTHREAD
-        sleep( j );
+        //sleep( j );
+
 #endif
         mypthread_yield( );
     }
@@ -193,8 +194,10 @@ int main( int argc, char **argv )
     //////////
     printf( "waiting...\n" );
 
-    for( i = 0; i < nListSize-1; i++ )
+    for( i = 0; i < nListSize-1; i++ ) {
+        //printf("Now beginning iteration %d of mtsort.c loop.\n", i);
         mypthread_join( threads[i], 0 );
+    }
     mypthread_join( thrcheck, 0 );
 
     for( i = 0; i < nListSize; i++ )
