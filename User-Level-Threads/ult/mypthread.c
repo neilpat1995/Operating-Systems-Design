@@ -69,7 +69,7 @@ int get_next_thread_id() {
 		next_thread_id++;
 
 		// if we got to the end of the list
-		if(next_thread_id == num_threads) {
+		if(next_thread_id == num_threads - 1) {
 			// go back to the beginning
 			next_thread_id = 0;
 		}
