@@ -19,13 +19,9 @@ static int num_threads = 0;
  *	HELPER FUNCTIONS
  *	---------------------------------------------------------------------- */
 
-// check if thread has been initialized
-int is_init(int thread_id) {
-	return threads[thread_id].state == UNUSED;
-}
-
 // initialize a running thread
 void init_thread_running(ucontext_t* context) {
+	printf("[initializing thread %d]\n", num_threads);
 	mypthread_t *running_thread = &(threads[num_threads]);
 
 	// initialize the thread
@@ -40,6 +36,7 @@ void init_thread_running(ucontext_t* context) {
 
 // initialize a new thread with the start routine and args provided
 void init_thread_new(void *(*start_routine) (void *), void *arg, ucontext_t* context) {
+	printf("[initializing thread %d]\n", num_threads);
 	mypthread_t *new_thread = &(threads[num_threads]);
 
 	// allocate a stack
@@ -84,11 +81,13 @@ int get_next_thread_id() {
 		}
 	} while(threads[next_thread_id].state != READY && threads[next_thread_id].state != NEW);
 
+	printf("[next thread: %d]\n", next_thread_id);
 	return next_thread_id;
 }
 
 // swtich to the thread of the given id (does not return on success)
 void switch_to_thread(int next_thread_id) {
+	printf("[switching to thread: %d]\n", next_thread_id);
 	int temp = running_thread_id;
 	running_thread_id = next_thread_id;
 	swapcontext(threads[temp].context, threads[next_thread_id].context);
@@ -102,7 +101,7 @@ void switch_to_thread(int next_thread_id) {
 int mypthread_create(mypthread_t *thread, const mypthread_attr_t *attr, void *(*start_routine) (void *), void *arg) {
 	// check for too many threads
 	if(num_threads == MAX_THREADS) {
-		printf("Error: Too many threads. Max is %d.\n", MAX_THREADS);
+		printf("Error: Too many threads! Max is %d.\n", MAX_THREADS);
 		return -1;
 	}
 
@@ -116,14 +115,14 @@ int mypthread_create(mypthread_t *thread, const mypthread_attr_t *attr, void *(*
 		// make the main thread (starting with its context)
 		ucontext_t* main_context = (ucontext_t*)malloc(sizeof(ucontext_t));
 		if(getcontext(main_context)){
-			printf("Failed to get main context.\n");
+			printf("Error: Failed to get main context!\n");
 			return -1;
 		}
 		init_thread_running(main_context);
 		
 		// make sure we don't end up here again
 		if(first) {
-			printf("SOMETHING WENT WRONG, MAIN RETURNED TO CREATE()!\n");
+			printf("SOMETHING WENT HORRIBLY WRONG, MAIN RETURNED TO CREATE()!\n");
 		}
 		first = 1;
 	}
@@ -131,7 +130,7 @@ int mypthread_create(mypthread_t *thread, const mypthread_attr_t *attr, void *(*
 	// make the new thread (starting with its context)
 	ucontext_t* new_context = (ucontext_t*)malloc(sizeof(ucontext_t));
 	if(getcontext(new_context)){
-		printf("Failed to get new context.\n");
+		printf("Error: Failed to get new context!\n");
 		return -1;
 	}
 	init_thread_new(start_routine, arg, new_context);
@@ -156,7 +155,7 @@ void mypthread_exit(void *retval) {
 	int next_thread_id = get_next_thread_id();
 	if(next_thread_id == running_thread_id) {
 		// well, looks like we're done here
-		printf("Error: Last ready thread exited!\n");
+		printf("Error: Last runnable thread exited!\n");
 		exit(0);
 	}
 
@@ -165,7 +164,7 @@ void mypthread_exit(void *retval) {
 	threads[next_thread_id].state = RUNNING;
 
 	// set context to the new one
-
+	free(threads[running_thread_id].context.uc_stack.ss_sp);
 	free(threads[running_thread_id].context);
 	switch_to_thread(next_thread_id);
 }
@@ -182,7 +181,7 @@ int mypthread_yield(void) {
 		// there's nothing to yield to...
 		if(threads[running_thread_id].join_id != -1) {
 			// ...but we're blocked!
-			printf("Error: Deadlock!\n");
+			printf("Error: Deadlock! Last runnable thread yielded.\n");
 			exit(0);
 		} else {
 			// ...so let's keep going
@@ -199,7 +198,6 @@ int mypthread_yield(void) {
 	threads[next_thread_id].state = RUNNING;
 
 	// set context to the new one
-	printf("Next thread id: %d\n", threads[next_thread_id].id);
 	switch_to_thread(next_thread_id);
 
 	return 0;
@@ -213,7 +211,7 @@ int mypthread_join(mypthread_t thread, void **retval) {
 	int iter = 1;
 	while (currThread.join_id != -1) {
 		if (currThread.join_id == running_thread_id) {
-			printf("Error: Thread attempting to join on itself. Iteration: %d\n", iter);
+			printf("Error: Deadlock! Circular join of length: %d\n", iter);
 			return(1);	
 		}
 		iter++;
@@ -225,7 +223,7 @@ int mypthread_join(mypthread_t thread, void **retval) {
 		*retval = threads[thread.id].retval;
 	} else {
 		threads[running_thread_id].state = BLOCKED;
-		threads[running_thread_id].join_id = thread.id;
+		threads[thread.id].join_id = thread.id;
 		mypthread_yield();
 	}
 	return 0;
