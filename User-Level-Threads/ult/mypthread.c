@@ -23,6 +23,16 @@ static int num_threads = 0;
 void init_thread_running(ucontext_t* context) {
 	mypthread_t *running_thread = &(threads[num_threads]);
 
+	// allocate a stack
+	stack_t new_stack;
+	new_stack.ss_sp = malloc(STACK_SIZE);
+	new_stack.ss_size = STACK_SIZE;
+	new_stack.ss_flags = 0;
+
+	// assign the stack to the context
+	context->uc_stack = new_stack;
+	context->uc_link = 0;
+
 	// initialize the thread
 	running_thread->state = RUNNING;
 	running_thread->id = 0;
@@ -33,7 +43,7 @@ void init_thread_running(ucontext_t* context) {
 	num_threads++;
 
 	if(threads[0].context->uc_stack.ss_sp == 0x0) {
-		printf("WHAT THE FUCK\n");
+		printf("WHAT. THE ACTUAL FISH.\n");
 	}
 }
 
