@@ -205,25 +205,25 @@ int mypthread_yield(void) {
 
 int mypthread_join(mypthread_t thread, void **retval) {
 
+	// check for circular joins by jumping from thread to joined on thread
+	int check_id = threads[thread.id].join_id;
+	for(int i = 0; check_id != -1; i++) {
+		if(check_id == running_thread_id) {
+			// bad! circular join
+			printf("Error: Deadlock! Circular join of length: %d\n", i);
+			return(1);
+		} else {
+			// try the thread that this one joins on
+			check_id = threads[check_id].join_id;
+		}
+	}
+
 	// if that thread is done, get its retval, otherwise yield
 	if(threads[thread.id].state == DONE) {
 		*retval = threads[thread.id].retval;
 	} else {
 		threads[running_thread_id].state = BLOCKED;
 		threads[running_thread_id].join_id = thread.id;
-
-		/*First, check for circular join (i.e. the thread to join on is either the running thread, or joins on a sequence of threads that
-		joins on running thread)*/
-		mypthread_t currThread = thread; 
-		int iter = 1;
-		while (currThread.join_id != -1) {
-			if (currThread.join_id == running_thread_id) {
-				printf("Error: Deadlock! Circular join of length: %d\n", iter);
-				return(1);	
-			}
-			iter++;
-			currThread = threads[currThread.join_id];
-		}
 		mypthread_yield();
 	}
 	return 0;
