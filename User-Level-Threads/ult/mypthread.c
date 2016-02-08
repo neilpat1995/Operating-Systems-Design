@@ -23,16 +23,6 @@ static int num_threads = 0;
 void init_thread_running(ucontext_t* context) {
 	mypthread_t *running_thread = &(threads[num_threads]);
 
-	// allocate a stack
-	/*stack_t new_stack;
-	new_stack.ss_sp = malloc(STACK_SIZE);
-	new_stack.ss_size = STACK_SIZE;
-	new_stack.ss_flags = 0;
-
-	// assign the stack to the context
-	context->uc_stack = new_stack;
-	context->uc_link = 0;*/
-
 	// initialize the thread
 	running_thread->state = RUNNING;
 	running_thread->id = 0;
@@ -159,7 +149,6 @@ int mypthread_create(mypthread_t *thread, const mypthread_attr_t *attr, void *(*
 }
 
 void mypthread_exit(void *retval) {
-	printf("exit\n");
 	// store the retval
 	threads[running_thread_id].retval = retval;
 
@@ -183,17 +172,16 @@ void mypthread_exit(void *retval) {
 	threads[running_thread_id].state = DONE;
 	threads[next_thread_id].state = RUNNING;
 
-	// set context to the new one
-	// printf("line: %d\n", __LINE__);
-	// free(threads[running_thread_id].context->uc_stack.ss_sp);
-	// printf("line: %d\n", __LINE__);
-	// free(threads[running_thread_id].context);
-	// printf("line: %d\n", __LINE__);
+	set context to the new one
+	printf("line: %d\n", __LINE__);
+	free(threads[running_thread_id].context->uc_stack.ss_sp);
+	printf("line: %d\n", __LINE__);
+	free(threads[running_thread_id].context);
+	printf("line: %d\n", __LINE__);
 	switch_to_thread(next_thread_id);
 }
 
 int mypthread_yield(void) {
-	printf("yield\n");
 	// check if we've even made any threads yet
 	if(!first) {
 		return 0;
@@ -228,7 +216,6 @@ int mypthread_yield(void) {
 }
 
 int mypthread_join(mypthread_t thread, void **retval) {
-	printf("join\n");
 	// check for circular joins by jumping from thread to joined on thread
 	int check_id = threads[thread.id].join_id;
 	for(int i = 0; check_id != -1; i++) {
