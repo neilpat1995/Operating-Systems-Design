@@ -93,6 +93,10 @@ int get_next_thread_id() {
 		}
 	} while(threads[next_thread_id].state != READY && threads[next_thread_id].state != NEW);
 
+	if(threads[next_thread_id].state != READY && threads[next_thread_id].state != NEW) {
+		printf("what the fish\n");
+	}
+
 	return next_thread_id;
 }
 
