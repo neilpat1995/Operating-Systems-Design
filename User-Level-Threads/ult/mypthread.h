@@ -25,7 +25,6 @@ typedef struct {
 } mypthread_t;
 
 typedef struct {
-	// Define any fields you might need inside here.
 } mypthread_attr_t;
 
 // Functions

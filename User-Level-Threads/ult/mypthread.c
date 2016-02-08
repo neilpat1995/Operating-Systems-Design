@@ -60,7 +60,7 @@ void init_thread_new(void *(*start_routine) (void *), void *arg, ucontext_t* con
 	num_threads++;
 }
 
-// get the thread id of the next ready thread in the queue (or the current if no other ones are ready)
+// get the thread id of the next ready thread in the array (or the current if no other ones are ready)
 int get_next_thread_id() {
 	int next_thread_id = running_thread_id;
 	do {
@@ -114,8 +114,15 @@ int mypthread_create(mypthread_t *thread, const mypthread_attr_t *attr, void *(*
 			printf("Error: Failed to get main context!\n");
 			return -1;
 		}
-		init_thread_running(main_context);
-		
+
+		if (first != 1) {
+			printf("Now creating the main thread and adding to list.\n");
+			init_thread_running(main_context);		
+			printf("Main thread: \nState: %d \nID: %d \nJoin-ID: %d \n", threads[0].state, threads[0].id, threads[0].join_id);
+			printf("Context stack: %0x\n", threads[0].context->uc_stack);
+			printf("Context stack's size: %lu\n", threads[0].context->uc_stack.ss_size);
+		}		
+
 		// make sure we don't end up here again
 		if(first) {
 			printf("SOMETHING WENT HORRIBLY WRONG, MAIN RETURNED TO CREATE()!\n");

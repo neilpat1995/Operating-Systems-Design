@@ -103,9 +103,6 @@ void * fncheck( void *arg )
             printf("\nQuitting...\n");
         quitting = check;
 
-        //ADDED CODE
-        printList(pList, nListSize);
-
         //unlock all threads
         for( i = 0; i < size; i++ )
             mypthread_mutex_unlock( mtx+i );
@@ -194,7 +191,6 @@ int main( int argc, char **argv )
     printf( "waiting...\n" );
 
     for( i = 0; i < nListSize-1; i++ ) {
-        printf("Now beginning iteration %d of mtsort.c loop.\n", i);
         mypthread_join( threads[i], 0 );
     }
     mypthread_join( thrcheck, 0 );
