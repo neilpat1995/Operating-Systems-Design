@@ -231,34 +231,26 @@ int mypthread_join(mypthread_t thread, void **retval) {
 	printf("join\n");
 	// check for circular joins by jumping from thread to joined on thread
 	int check_id = threads[thread.id].join_id;
-	printf("line: %d\n", __LINE__);
 	for(int i = 0; check_id != -1; i++) {
-		printf("line: %d\n", __LINE__);
 		if(check_id == running_thread_id) {
-			printf("line: %d\n", __LINE__);
 			// bad! circular join
 			printf("Error: Deadlock! Circular join of length: %d\n", i);
 			return(1);
 		} else {
-			printf("line: %d\n", __LINE__);
 			// try the thread that this one joins on
 			check_id = threads[check_id].join_id;
 		}
 	}
-	printf("line: %d\n", __LINE__);
 
 	// if that thread is done, get its retval, otherwise yield
 	if(threads[thread.id].state == DONE) {
-		printf("line: %d\n", __LINE__);
 		if(retval != 0x0) {
 			*retval = threads[thread.id].retval;
 		}
 	} else {
-		printf("line: %d\n", __LINE__);
 		threads[running_thread_id].state = BLOCKED;
 		threads[running_thread_id].join_id = thread.id;
 		mypthread_yield();
 	}
-	printf("line: %d\n", __LINE__);
 	return 0;
 }
