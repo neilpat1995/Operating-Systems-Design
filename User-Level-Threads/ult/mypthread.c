@@ -163,6 +163,8 @@ void mypthread_exit(void *retval) {
 	// store the retval
 	threads[running_thread_id].retval = retval;
 
+	printf("line: %d\n", __LINE__);
+
 	// set all threads waiting on the current one to be ready
 	for(int i = 0; i < num_threads; i++) {
 		if(threads[i].join_id == running_thread_id) {
@@ -170,6 +172,8 @@ void mypthread_exit(void *retval) {
 			threads[i].state = READY;
 		}
 	}
+
+	printf("line: %d\n", __LINE__);
 
 	// switch to the next available thread
 	int next_thread_id = get_next_thread_id();
@@ -179,9 +183,13 @@ void mypthread_exit(void *retval) {
 		exit(0);
 	}
 
+	printf("line: %d\n", __LINE__);
+
 	// update states
 	threads[running_thread_id].state = DONE;
 	threads[next_thread_id].state = RUNNING;
+
+	printf("line: %d\n", __LINE__);
 
 	// set context to the new one
 	free(threads[running_thread_id].context->uc_stack.ss_sp);
