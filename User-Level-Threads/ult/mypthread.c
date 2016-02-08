@@ -250,7 +250,9 @@ int mypthread_join(mypthread_t thread, void **retval) {
 	// if that thread is done, get its retval, otherwise yield
 	if(threads[thread.id].state == DONE) {
 		printf("line: %d\n", __LINE__);
-		*retval = threads[thread.id].retval;
+		if(retval != 0x0) {
+			*retval = threads[thread.id].retval;
+		}
 	} else {
 		printf("line: %d\n", __LINE__);
 		threads[running_thread_id].state = BLOCKED;
