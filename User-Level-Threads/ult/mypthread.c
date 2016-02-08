@@ -101,6 +101,7 @@ int get_next_thread_id() {
 void switch_to_thread(int next_thread_id) {
 	int temp = running_thread_id;
 	running_thread_id = next_thread_id;
+	printf("running thread: %d\n", running_thread_id);
 	swapcontext(threads[temp].context, threads[next_thread_id].context);
 }
 
@@ -158,6 +159,7 @@ int mypthread_create(mypthread_t *thread, const mypthread_attr_t *attr, void *(*
 }
 
 void mypthread_exit(void *retval) {
+	printf("exit\n");
 	// store the retval
 	threads[running_thread_id].retval = retval;
 
@@ -184,11 +186,11 @@ void mypthread_exit(void *retval) {
 	// set context to the new one
 	free(threads[running_thread_id].context->uc_stack.ss_sp);
 	free(threads[running_thread_id].context);
-	printf("gonna switch to %d\n\n", next_thread_id);
 	switch_to_thread(next_thread_id);
 }
 
 int mypthread_yield(void) {
+	printf("yield\n");
 	// check if we've even made any threads yet
 	if(!first) {
 		return 0;
@@ -223,7 +225,7 @@ int mypthread_yield(void) {
 }
 
 int mypthread_join(mypthread_t thread, void **retval) {
-
+	printf("join\n");
 	// check for circular joins by jumping from thread to joined on thread
 	int check_id = threads[thread.id].join_id;
 	for(int i = 0; check_id != -1; i++) {
