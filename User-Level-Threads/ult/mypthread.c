@@ -194,6 +194,7 @@ int mypthread_yield(void) {
 
 	// switch to the next available thread
 	int next_thread_id = get_next_thread_id();
+	printf("next thread id is %d\n", next_thread_id);
 	if(next_thread_id == running_thread_id) {
 		// there's nothing to yield to...
 		if(threads[running_thread_id].join_id != -1) {
@@ -215,6 +216,7 @@ int mypthread_yield(void) {
 	threads[next_thread_id].state = RUNNING;
 
 	// set context to the new one
+	printf("gonna switch to %d\n", next_thread_id);
 	switch_to_thread(next_thread_id);
 
 	return 0;
