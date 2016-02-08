@@ -184,6 +184,7 @@ void mypthread_exit(void *retval) {
 	// set context to the new one
 	free(threads[running_thread_id].context->uc_stack.ss_sp);
 	free(threads[running_thread_id].context);
+	printf("gonna switch to %d\n\n", next_thread_id);
 	switch_to_thread(next_thread_id);
 }
 
@@ -196,15 +197,12 @@ int mypthread_yield(void) {
 	// switch to the next available thread
 	int next_thread_id = get_next_thread_id();
 	if(next_thread_id == running_thread_id) {
-		printf("hmm\n");
 		// there's nothing to yield to...
 		if(threads[running_thread_id].join_id != -1) {
-			printf("yeah\n");
 			// ...but we're blocked!
 			printf("Error: Deadlock! Last runnable thread yielded.\n");
 			exit(0);
 		} else {
-			printf("huh?\n");
 			// ...so let's keep going
 			return 0;
 		}
@@ -212,16 +210,13 @@ int mypthread_yield(void) {
 
 	// update states (if we were waiting for a join, we become blocked)
 	if(threads[running_thread_id].join_id == -1) {
-		printf("I see\n");
 		threads[running_thread_id].state = READY;
 	} else {
-		printf("intriguing\n");
 		threads[running_thread_id].state = BLOCKED;
 	}
 	threads[next_thread_id].state = RUNNING;
 
 	// set context to the new one
-	printf("gonna switch to %d\n\n", next_thread_id);
 	switch_to_thread(next_thread_id);
 
 	return 0;
