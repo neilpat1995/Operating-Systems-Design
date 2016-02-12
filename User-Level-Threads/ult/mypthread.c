@@ -172,7 +172,11 @@ void mypthread_exit(void *retval) {
 	threads[running_thread_id].state = DONE;
 	threads[next_thread_id].state = RUNNING;
 
+<<<<<<< HEAD
 	//set context to the new one
+=======
+	// set context to the new one
+>>>>>>> e5c5bfd64016e9989b6748d6257b6f8016b7bf8b
 	printf("line: %d\n", __LINE__);
 	free(threads[running_thread_id].context->uc_stack.ss_sp);
 	printf("line: %d\n", __LINE__);
